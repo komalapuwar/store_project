@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>login</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+         <link rel="stylesheet" href="style.css">
+        </head>
+
+        <body>
+            <div class="wrapper">                
+                <div class="Welcome-text">
+                    <h1>Welcome Back!</h1>
+                    <p>please login into your account.</p>
+                </div>
+
+                <form>
+                    <div>
+                        <span class="material-symbols-outlined">person</span>
+                        <input type="text" name="username" id="username-input" placeholder="username">   
+                    </div> 
+
+                    <div>
+                <span class="material-symbols-outlined">lock</span>
+                <input type="password" name="password" id="password-input" placeholder="Password">
+            </div>
+
+
+                
+               <div>
+        <span class="material-symbols-outlined">id_card</span>
+        <select name="role" id="role-input">
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="supplier">Supplier</option>
+        </select>
+        </div>
+                    
+            <div>
+                <button type="submit" class="login-btn">
+                <span class="material-symbols-outlined">login</span>
+                Login</button>
+            </div>
+                        
+            <p class="register-text"> No A/C Yet? <a href="register.html">Register</a>
+            </p>
+
+            </form>
+             </div>
+             
+
+        </body>
+</html>
