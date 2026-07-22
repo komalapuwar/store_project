@@ -15,41 +15,50 @@
                     <p>please login into your account.</p>
                 </div>
 
-                <form>
+                <form action="/login">
+
                     <div>
                         <span class="material-symbols-outlined">person</span>
-                        <input type="text" name="username" id="username-input" placeholder="username">   
+                        <input type="text" name="username" id="username-input" placeholder="Username" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$"
+    title="Password must be at least 8 characters and include an uppercase letter, lowercase letter, number, and special character." required>   
                     </div> 
 
                     <div>
-                <span class="material-symbols-outlined">lock</span>
-                <input type="password" name="password" id="password-input" placeholder="Password">
-            </div>
-
-
-                
-               <div>
-        <span class="material-symbols-outlined">id_card</span>
-        <select name="role" id="role-input">
-            <option value="">Select Role</option>
-            <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="supplier">Supplier</option>
-        </select>
-        </div>
+                        <span class="material-symbols-outlined">lock</span>
+                        <input type="password" name="password" id="password-input" placeholder="Password" minlength="8" required>
+                    </div>
                     
-            <div>
-                <button type="submit" class="login-btn">
-                <span class="material-symbols-outlined">login</span>
-                Login</button>
-            </div>
+                    <div>
+                        <span class="material-symbols-outlined">id_card</span>
+                        <select name="role" id="role-input">
+                            <option value="" disabled selected>Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="manager">Manager</option>
+                            <option value="supplier">Supplier</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <button type="submit">Login</button>
+                    </div>
                         
-            <p class="register-text"> No A/C Yet? <a href="register.html">Register</a>
+            <p class="register-text"> No account Yet? <a href="register.html">Register</a>
             </p>
 
             </form>
              </div>
-             
 
-        </body>
-</html>
+             <script>
+             function validateForm() 
+             {
+                let password = document.getElementById("password-input").value;
+                let confirmPassword = document.getElementById("confirm-password-input").value;
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match!");
+                    return false;
+                }
+                 return true;
+                 }
+                 </script>
+                 </body>
+                 </html>
