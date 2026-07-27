@@ -5,13 +5,14 @@ from database import mysql
 supplier_bp = Blueprint('supplier', __name__)
 
 
-# Open Supplier Page (HTML Form)
+# Open Supplier Page
 @supplier_bp.route('/supplier')
 def supplier_page():
     return render_template("supplier.html")
 
 
-# View all suppliers (JSON)
+
+# View all suppliers
 @supplier_bp.route('/suppliers', methods=['GET'])
 def get_suppliers():
 
@@ -27,7 +28,7 @@ def get_suppliers():
         suppliers.append({
             "supplier_id": row[0],
             "u_id": row[1],
-            "add_id": row[2]
+            "address": row[2]
         })
 
     cur.close()
@@ -35,29 +36,34 @@ def get_suppliers():
     return jsonify(suppliers)
 
 
+
 # Add Supplier
 @supplier_bp.route('/suppliers/add', methods=['POST'])
 def add_supplier():
 
     u_id = request.form['u_id']
-    add_id = request.form['add_id']
+    address = request.form['address']
+
 
     cursor = mysql.connection.cursor()
 
     query = """
-        INSERT INTO supplier (u_id, add_id)
+        INSERT INTO supplier (u_id, address)
         VALUES (%s, %s)
     """
 
-    cursor.execute(query, (u_id, add_id))
+
+    cursor.execute(query, (u_id, address))
 
     mysql.connection.commit()
 
     cursor.close()
 
+
     return jsonify({
         "message": "Supplier added successfully."
     })
+
 
 
 # Delete Supplier
@@ -66,18 +72,22 @@ def delete_supplier(id):
 
     cursor = mysql.connection.cursor()
 
+
     cursor.execute(
         "DELETE FROM supplier WHERE supplier_id=%s",
         (id,)
     )
 
+
     mysql.connection.commit()
 
     cursor.close()
 
+
     return jsonify({
         "message": "Supplier deleted successfully."
     })
+
 
 
 # Update Supplier
@@ -85,17 +95,24 @@ def delete_supplier(id):
 def update_supplier(id):
 
     u_id = request.form['u_id']
-    add_id = request.form['add_id']
+    address = request.form['address']
+
 
     cursor = mysql.connection.cursor()
 
+
     query = """
         UPDATE supplier
-        SET u_id=%s, add_id=%s
+        SET u_id=%s, address=%s
         WHERE supplier_id=%s
     """
 
-    cursor.execute(query, (u_id, add_id, id))
+
+    cursor.execute(
+        query,
+        (u_id, address, id)
+    )
+
 
     mysql.connection.commit()
 
