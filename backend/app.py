@@ -13,23 +13,20 @@ from routes.supplier import supplier_bp
 from routes.conditions import conditions_bp
 from routes.notifications import notifications_bp
 from routes.transactions import transactions_bp
+from routes.reports import report_bp
 
 
 # Create Flask App
 app = Flask(__name__)
 
-
-# Enable React Frontend Connection
+# Enable CORS
 CORS(app)
-
 
 # Load Configuration
 app.config.from_object(Config)
 
-
 # Initialize MySQL
 mysql.init_app(app)
-
 
 # Register Blueprints
 app.register_blueprint(auth_bp, url_prefix="/api")
@@ -41,11 +38,11 @@ app.register_blueprint(supplier_bp, url_prefix="/api")
 app.register_blueprint(conditions_bp, url_prefix="/api")
 app.register_blueprint(notifications_bp, url_prefix="/api")
 app.register_blueprint(transactions_bp, url_prefix="/api")
+app.register_blueprint(report_bp, url_prefix="/api")
 
 
 # Run Flask Application
 if __name__ == "__main__":
-
     app.run(
         host="0.0.0.0",
         port=5000,
