@@ -1,91 +1,126 @@
-from flask import Blueprint, request, render_template, redirect, session
+from flask import Blueprint, request, jsonify, session
 from database import mysql
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint("auth", __name__)
 
 
-  #Login page
-@auth_bp.route('/')
-def login_page():
-    return render_template("login.html")
+# -----------------------------
+# Backend Test
+# -----------------------------
+@auth_bp.route("/", methods=["GET"])
+def home():
+
+    return jsonify({
+        "success": True,
+        "message": "Flask Backend is Running"
+    })
 
 
-
- # Register page
-@auth_bp.route('/register')
-def register_page():
-  return render_template("register.html")
-
-
-
-# Register user
-@auth_bp.route('/register', methods=['POST'])
+# -----------------------------
+# Register
+# -----------------------------
+@auth_bp.route("/register", methods=["POST"])
 def register():
 
-    fullname = request.form['fullname']
-    gmail = request.form['gmail']
-    phone_no = request.form['phone_no']
-    username = request.form['user_name']
+    data = request.get_json()
 
-    password = request.form['password']
-    confirm_password = request.form['confirm_password']
-
-    role = request.form['role']
+    fullname = data["fullname"]
+    username = data["username"]
+    email = data["email"]
+    phone = data["phone"]
+    password = data["password"]
+    confirm_password = data["confirm_password"]
+    role = data["role"]
 
 
     if password != confirm_password:
-        return "Password does not match"
 
+        return jsonify({
+            "success": False,
+            "message": "Passwords do not match."
+        }), 400
 
 
     cursor = mysql.connection.cursor()
 
 
-    # Check existing user
+    # Check duplicate username/email
 
     cursor.execute(
         """
-        SELECT * FROM users 
+        SELECT *
+        FROM users
         WHERE user_name=%s OR gmail=%s
         """,
-        (username, gmail)
+        (
+            username,
+            email
+        )
     )
 
 
-    existing_user = cursor.fetchone()
+    existing = cursor.fetchone()
 
 
-    if existing_user:
+    if existing:
 
         cursor.close()
 
-        return "Username or Gmail already exists"
+        return jsonify({
+            "success": False,
+            "message": "Username or Email already exists."
+        }), 400
 
 
-
-    # Hash password
 
     hashed_password = generate_password_hash(password)
 
 
 
+    # Insert user
+
     cursor.execute(
         """
         INSERT INTO users
-        (fullname,user_name,gmail,password,phone_no,role)
+        (
+            fullname,
+            user_name,
+            gmail,
+            password,
+            phone_no,
+            role
+        )
         VALUES(%s,%s,%s,%s,%s,%s)
         """,
         (
             fullname,
             username,
-            gmail,
+            email,
             hashed_password,
-            phone_no,
+            phone,
             role
         )
     )
+
+
+    user_id = cursor.lastrowid
+
+
+
+    # Add supplier record if role is supplier
+
+    if role.lower() == "supplier":
+
+        cursor.execute(
+            """
+            INSERT INTO supplier
+            (u_id)
+            VALUES(%s)
+            """,
+            (user_id,)
+        )
 
 
     mysql.connection.commit()
@@ -93,30 +128,40 @@ def register():
     cursor.close()
 
 
-    return redirect('/')
+    return jsonify({
+        "success": True,
+        "message": "Registration Successful."
+    })
 
 
 
-
-
+# -----------------------------
 # Login
-
-@auth_bp.route('/login', methods=['POST'])
+# -----------------------------
+@auth_bp.route("/login", methods=["POST"])
 def login():
 
-    username = request.form['username']
+    data = request.get_json()
 
-    password = request.form['password']
 
-    role = request.form['role']
-
+    username = data["username"]
+    password = data["password"]
+    role = data["role"]
 
 
     cursor = mysql.connection.cursor()
 
 
     cursor.execute(
-        "SELECT * FROM users WHERE user_name=%s",
+        """
+        SELECT
+            u_id,
+            user_name,
+            password,
+            role
+        FROM users
+        WHERE user_name=%s
+        """,
         (username,)
     )
 
@@ -128,39 +173,45 @@ def login():
 
 
 
-    if user:
+    if not user:
 
-
-        # Authentication
-
-        if check_password_hash(user["password"], password):
-
-
-            # Authorization
-
-            if user["role"] == role:
-
-
-                session["u_id"] = user["u_id"]
-
-                session["role"] = user["role"]
+        return jsonify({
+            "success": False,
+            "message": "Invalid username."
+        }), 401
 
 
 
-                if role == "supplier":
+    if not check_password_hash(
+        user[2],
+        password
+    ):
 
-                    return redirect("/supplier")
-
-
-                elif role == "admin":
-
-                    return "Admin Dashboard"#(coming soon)
-
-
-                elif role == "manager":
-
-                    return "Manager Dashboard"#(coming soon)
+        return jsonify({
+            "success": False,
+            "message": "Incorrect password."
+        }), 401
 
 
 
-    return "Invalid Username, Password or Role"
+    if user[3].lower() != role.lower():
+
+        return jsonify({
+            "success": False,
+            "message": "Incorrect role selected."
+        }), 401
+
+
+
+    session["u_id"] = user[0]
+    session["role"] = user[3]
+
+
+
+    return jsonify({
+
+        "success": True,
+        "message": "Login Successful.",
+        "role": user[3]
+
+    })

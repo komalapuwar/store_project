@@ -3,5 +3,7 @@ class Config:
 
     MYSQL_HOST = "localhost"
     MYSQL_USER = "root"
-    MYSQL_PASSWORD = "hey&1902pravu#"      
+    MYSQL_PASSWORD = "hey&1902pravu#"
     MYSQL_DB = "store_management"
+
+    MYSQL_CURSORCLASS = "DictCursor"
