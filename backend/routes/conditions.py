@@ -27,6 +27,8 @@ def error_response(message="An error occurred", status_code=400):
     }), status_code
 
 
+
+# JWT TOKEN CHECK
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -40,9 +42,7 @@ def token_required(f):
             )
 
         try:
-            parts = auth_header.split()
-
-            token = parts[1]
+            token = auth_header.split()[1]
 
             secret = current_app.config.get(
                 "SECRET_KEY",
@@ -69,100 +69,107 @@ def token_required(f):
 
 
 
-# GET CONDITION HISTORY
+# GET ALL PRODUCT CONDITION HISTORY
 @conditions_bp.route("/conditions", methods=["GET"])
 @token_required
-def get_conditions_history():
+def get_conditions():
 
-    conn = mysql.connection
-    cursor = conn.cursor()
+    cursor = mysql.connection.cursor()
 
     try:
 
         query = """
-            SELECT 
-                pc.id,
+            SELECT
+                pc.condition_id,
                 pc.product_id,
-                p.name AS product_name,
-                pc.condition,
-                pc.notes,
-                u.username AS logged_by,
-                pc.created_at
-            FROM product_conditions pc
-            JOIN products p 
-            ON pc.product_id = p.id
-            LEFT JOIN users u 
-            ON pc.logged_by = u.id
-            ORDER BY pc.created_at DESC
+                p.product_name,
+                pc.condition_status,
+                pc.remarks,
+                u.user_name AS checked_by,
+                pc.checked_date
+
+            FROM product_condition pc
+
+            JOIN products p
+            ON pc.product_id = p.product_id
+
+            LEFT JOIN users u
+            ON pc.checked_by = u.user_id
+
+            ORDER BY pc.checked_date DESC
         """
 
         cursor.execute(query)
 
         columns = [col[0] for col in cursor.description]
+
         rows = cursor.fetchall()
 
-        logs = []
+        data = []
 
         for row in rows:
-            logs.append(dict(zip(columns, row)))
+            data.append(dict(zip(columns, row)))
 
 
         return success_response(
-            data=logs,
-            message="Product condition history retrieved"
+            data,
+            "Product condition history retrieved"
         )
 
 
     except Exception as e:
 
         return error_response(
-            f"Error: {str(e)}",
+            str(e),
             500
         )
 
 
     finally:
-
         cursor.close()
 
 
 
-# UPDATE PRODUCT CONDITION
+# ADD PRODUCT CONDITION
 @conditions_bp.route("/conditions", methods=["POST"])
 @token_required
-def update_product_condition():
+def add_condition():
 
     data = request.get_json() or {}
 
     product_id = data.get("product_id")
-    condition = data.get("condition", "").strip()
-    notes = data.get("notes", "").strip()
+    condition_status = data.get("condition_status")
+    remarks = data.get("remarks")
 
 
-    if not product_id or not condition:
+    if not product_id or not condition_status:
         return error_response(
-            "product_id and condition are required"
+            "product_id and condition_status are required"
         )
 
 
-    if condition not in [
+    if condition_status not in [
         "Good",
         "Damaged",
-        "Repair Needed"
+        "Repair"
     ]:
         return error_response(
-            "Invalid condition. Allowed: Good, Damaged, Repair Needed"
+            "Invalid condition"
         )
 
 
-    conn = mysql.connection
-    cursor = conn.cursor()
+    cursor = mysql.connection.cursor()
 
 
     try:
 
+        # Check product exists
         cursor.execute(
-            "SELECT name FROM products WHERE id = %s",
+            """
+            SELECT product_name
+            FROM products
+            WHERE product_id=%s
+            """,
             (product_id,)
         )
 
@@ -179,71 +186,55 @@ def update_product_condition():
         user_id = g.current_user.get("user_id")
 
 
-        # Update product condition
+        # Insert condition history
         cursor.execute(
             """
-            UPDATE products
-            SET `condition` = %s
-            WHERE id = %s
-            """,
+            INSERT INTO product_condition
             (
-                condition,
-                product_id
+                product_id,
+                condition_status,
+                remarks,
+                checked_by
             )
-        )
-
-
-        # Update inventory condition
-        cursor.execute(
-            """
-            UPDATE inventory
-            SET `condition` = %s
-            WHERE product_id = %s
-            """,
-            (
-                condition,
-                product_id
-            )
-        )
-
-
-        # Store condition history
-        cursor.execute(
-            """
-            INSERT INTO product_conditions
-            (product_id, `condition`, notes, logged_by)
-            VALUES (%s, %s, %s, %s)
+            VALUES(%s,%s,%s,%s)
             """,
             (
                 product_id,
-                condition,
-                notes,
+                condition_status,
+                remarks,
                 user_id
             )
         )
 
 
-        # Create notification
-        if condition in [
+        # Notification for damaged products
+        if condition_status in [
             "Damaged",
-            "Repair Needed"
+            "Repair"
         ]:
 
-            msg = (
-                f"Product '{product[0]}' marked as "
-                f"'{condition}'. Notes: {notes}"
+
+            message = (
+                f"Product '{product[0]}' condition is "
+                f"{condition_status}. "
+                f"Remarks: {remarks}"
             )
 
 
             cursor.execute(
                 """
                 INSERT INTO notifications
-                (title, message, type, status)
-                VALUES (%s, %s, 'Product Damaged', 'unread')
+                (
+                    user_id,
+                    message,
+                    type
+                )
+                VALUES
+                (%s,%s,'General')
                 """,
                 (
-                    f"Product {condition}",
-                    msg
+                    user_id,
+                    message
                 )
             )
 
@@ -252,7 +243,7 @@ def update_product_condition():
 
 
         return success_response(
-            message="Product condition updated successfully"
+            message="Product condition added successfully"
         )
 
 
@@ -261,11 +252,77 @@ def update_product_condition():
         mysql.connection.rollback()
 
         return error_response(
-            f"Error: {str(e)}",
+            str(e),
             500
         )
 
 
     finally:
+        cursor.close()
 
+
+
+# GET SINGLE PRODUCT CONDITION
+@conditions_bp.route("/conditions/<int:product_id>", methods=["GET"])
+@token_required
+def get_product_condition(product_id):
+
+    cursor = mysql.connection.cursor()
+
+
+    try:
+
+        cursor.execute(
+            """
+            SELECT
+                condition_id,
+                product_id,
+                condition_status,
+                remarks,
+                checked_by,
+                checked_date
+
+            FROM product_condition
+
+            WHERE product_id=%s
+
+            ORDER BY checked_date DESC
+            """,
+            (product_id,)
+        )
+
+
+        rows = cursor.fetchall()
+
+        columns = [
+            "condition_id",
+            "product_id",
+            "condition_status",
+            "remarks",
+            "checked_by",
+            "checked_date"
+        ]
+
+
+        data = []
+
+        for row in rows:
+            data.append(dict(zip(columns,row)))
+
+
+        return success_response(
+            data,
+            "Condition details retrieved"
+        )
+
+
+    except Exception as e:
+
+        return error_response(
+            str(e),
+            500
+        )
+
+
+    finally:
         cursor.close()
