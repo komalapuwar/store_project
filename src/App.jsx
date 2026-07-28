@@ -1,19 +1,70 @@
 import React, { useState } from 'react';
+import AdminDashboard from './AdminDashboard';
 import ManagerDashboard from './ManagerDashboard';
 import SupplierDashboard from './SupplierDashboard';
 
 export default function App() {
-  const [activeRole, setActiveRole] = useState('manager'); // 'manager' | 'supplier'
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeRole, setActiveRole] = useState(''); // 'admin' | 'manager' | 'supplier'
 
+  // Yedi login bhaxaina bhane Login Page dekhauvne
+  if (!isLoggedIn) {
+    return (
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#0f172a',
+        color: '#fff',
+        fontFamily: 'sans-serif'
+      }}>
+        <div style={{
+          background: '#1e293b',
+          padding: '40px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+          width: '350px',
+          textAlign: 'center'
+        }}>
+          <h2>Store Login</h2>
+          <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '20px' }}>Select your role to login</p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button 
+              onClick={() => { setActiveRole('admin'); setIsLoggedIn(true); }}
+              style={{ padding: '10px', background: '#3498db', border: 'none', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Login as Admin
+            </button>
+            <button 
+              onClick={() => { setActiveRole('manager'); setIsLoggedIn(true); }}
+              style={{ padding: '10px', background: '#27ae60', border: 'none', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Login as Manager
+            </button>
+            <button 
+              onClick={() => { setActiveRole('supplier'); setIsLoggedIn(true); }}
+              style={{ padding: '10px', background: '#9b59b6', border: 'none', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Login as Supplier
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Login bhaisake paxi active role anusar ko Dashboard ra Top Switcher dekhauvne
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Top Navigation Switcher */}
+      {/* Top Bar Switcher & Logout */}
       <div style={{
         padding: '10px 25px',
         background: '#1e293b',
         color: '#fff',
         display: 'flex',
-        justify: 'space-between',
+        justifyContent: 'space-between',
         alignItems: 'center',
         borderBottom: '2px solid #334155',
         fontSize: '14px',
@@ -24,47 +75,31 @@ export default function App() {
           <strong>Store Management System</strong>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <span style={{ fontSize: '13px', color: '#94a3b8' }}>Select Dashboard:</span>
-
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <span style={{ fontSize: '13px', color: '#94a3b8' }}>Logged in as: <strong style={{color: '#fff'}}>{activeRole.toUpperCase()}</strong></span>
+          
+          {/* Logout Button */}
           <button
-            onClick={() => setActiveRole('manager')}
+            onClick={() => { setIsLoggedIn(false); setActiveRole(''); }}
             style={{
-              padding: '8px 18px',
-              borderRadius: '20px',
+              padding: '6px 14px',
+              borderRadius: '6px',
               border: 'none',
               cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-              backgroundColor: activeRole === 'manager' ? '#27ae60' : '#334155',
+              backgroundColor: '#e74c3c',
               color: '#ffffff',
-              transition: 'all 0.2s'
+              fontWeight: 600,
+              fontSize: '12px'
             }}
           >
-            <i className="fa-solid fa-user-tie" style={{ marginRight: '6px' }}></i> Manager Dashboard
-          </button>
-
-          <button
-            onClick={() => setActiveRole('supplier')}
-            style={{
-              padding: '8px 18px',
-              borderRadius: '20px',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-              backgroundColor: activeRole === 'supplier' ? '#9b59b6' : '#334155',
-              color: '#ffffff',
-              transition: 'all 0.2s'
-            }}
-          >
-            <i className="fa-solid fa-truck-field" style={{ marginRight: '6px' }}></i> Supplier Dashboard
+            <i className="fa-solid fa-right-from-bracket" style={{ marginRight: '5px' }}></i> Logout
           </button>
         </div>
       </div>
 
-      {/* Active Dashboard View */}
+      {/* Render Dashboard based on activeRole */}
       <div style={{ flex: 1 }}>
+        {activeRole === 'admin' && <AdminDashboard onNavigate={(role) => setActiveRole(role)} />}
         {activeRole === 'manager' && <ManagerDashboard onNavigate={(role) => setActiveRole(role)} />}
         {activeRole === 'supplier' && <SupplierDashboard onNavigate={(role) => setActiveRole(role)} />}
       </div>
