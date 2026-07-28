@@ -6,7 +6,8 @@ import Register from './components/Register';
 import AdminDashboard from './components/AdminDashboard';
 import SupplierManagement from './components/SupplierManagement';
 import ManageUsers from './components/ManageUsers';
-
+import ProductManagement from "./components/ProductManagement";
+import Inventory from "./components/Inventory";
 function MainLayout() {
   const location = useLocation();
   const hideNavbar = ['/admin', '/manager', '/suppliers'].includes(location.pathname);
@@ -24,6 +25,9 @@ function MainLayout() {
         <Route path="/supplier" element={<SupplierManagement />} />
 
         <Route path="/manage-users" element={<ManageUsers />} />
+        <Route path="/products" element={<ProductManagement />} />
+        <Route path="/inventory" element={<Inventory />} />
+
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

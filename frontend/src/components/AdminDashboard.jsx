@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const [activeNav, setActiveNav] = useState('Dashboard');
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationMsg, setNotificationMsg] = useState('');
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
       btnText: 'Manage Products',
       btnBg: '#16a34a',
       icon: Package,
-      action: () => triggerToast('Opening Product Catalog...'),
+      action: () => navigate('/products'),
     },
     {
       title: 'Inventory',
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
       btnText: 'View Inventory',
       btnBg: '#8b5cf6',
       icon: Boxes,
-      action: () => triggerToast('Loading Inventory Logs...'),
+      action: () => navigate('/inventory'),
     },
     {
       title: 'Low Stock Alerts',
