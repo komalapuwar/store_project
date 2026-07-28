@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+    <div class="dashboard">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-circle">A</div>
+                <h2>Admin Panel</h2>
+            </div>
+
+            <nav class="menu">
+                <a href="#" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </nav>
+        </aside>
+
+       
+        <main class="main-content">
+            
+          
+            <header class="topbar">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Welcome to the Admin Panel</p>
+                </div>
+
+                <div class="admin-profile">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Admin</span>
+                </div>
+            </header>
+
+           
+            <section class="stats">
+                <div class="stat-box">
+                    <h3>Total Users</h3>
+                    <p>25</p>
+                </div>
+
+                <div class="stat-box">
+                    <h3>Total Products</h3>
+                    <p>140</p>
+                </div>
+
+                <div class="stat-box">
+                    <h3>Low Stock</h3>
+                    <p>8</p>
+                </div>
+
+                <div class="stat-box">
+                    <h3>Receipts</h3>
+                    <p>56</p>
+                </div>
+            </section>
+
+           
+            <section class="cards">
+
+                <div class="card blue">
+                    <i class="fa-solid fa-users"></i>
+                    <h2>Manage Users</h2>
+                    <p>Add, edit, remove and control user accounts.</p>
+                    <button>Manage</button>
+                </div>
+
+                <div class="card green">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <h2>Stock Inflow / Outflow</h2>
+                    <p>Track stock entry, stock exit and inventory updates.</p>
+                    <button>View Stock</button>
+                </div>
+
+                <div class="card orange">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <h2>Product Condition</h2>
+                    <p>Check damaged, expired and low stock products.</p>
+                    <button>Inspect</button>
+                </div>
+
+                <div class="card purple">
+                    <i class="fa-solid fa-receipt"></i>
+                    <h2>Records / Receipts</h2>
+                    <p>View transactions, records and generated receipts.</p>
+                    <button>View Records</button>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+</body>
+</html>
